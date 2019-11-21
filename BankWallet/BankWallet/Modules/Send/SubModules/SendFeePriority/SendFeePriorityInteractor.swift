@@ -20,7 +20,7 @@ extension SendFeePriorityInteractor: ISendFeePriorityInteractor {
         provider.feeRate(for: priority)
                 .subscribeOn(ConcurrentDispatchQueueScheduler(qos: .utility))
                 .observeOn(MainScheduler.instance)
-                .subscribe(onSuccess: delegate?.didUpdate, onError: delegate?.didReceive)
+                .subscribe(onSuccess: delegate?.didUpdate, onError: delegate?.didReceiveError)
                 .disposed(by: disposeBag)
     }
 

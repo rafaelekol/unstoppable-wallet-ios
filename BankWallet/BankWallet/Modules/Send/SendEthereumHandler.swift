@@ -1,6 +1,7 @@
 import Foundation
 import RxSwift
 import EthereumKit
+import FeeRateKit
 import Erc20Kit
 
 enum FeeState {
@@ -17,6 +18,13 @@ enum FeeState {
         return false
     }
 
+    var isValid: Bool {
+        if case .value(_) = self {
+            return true
+        }
+        return false
+    }
+
 }
 
 class SendEthereumHandler {
@@ -27,10 +35,10 @@ class SendEthereumHandler {
 
     private let amountModule: ISendAmountModule
     private let addressModule: ISendAddressModule
-    private let feeModule: ISendFeeModule
     private let feePriorityModule: ISendFeePriorityModule
+    private let feeModule: ISendFeeModule
 
-    private var estimateGasLimitState: FeeState = .value(0)
+    private var estimateGasLimitState: FeeState = .zero
 
     init(interactor: ISendEthereumInteractor, amountModule: ISendAmountModule, addressModule: ISendAddressModule, feeModule: ISendFeeModule, feePriorityModule: ISendFeePriorityModule) {
         self.interactor = interactor
@@ -46,15 +54,21 @@ class SendEthereumHandler {
             _ = try amountModule.validAmount()
             try addressModule.validateAddress()
 
-            delegate?.onChange(isValid: feeModule.isValid)
+            delegate?.onChange(isValid: feeModule.isValid && feePriorityModule.feeRateState.isValid && estimateGasLimitState.isValid)
         } catch {
             delegate?.onChange(isValid: false)
         }
     }
 
-    private func syncFee() {
+    private func processFee(error: Error) {
+        feeModule.set(externalError: error is Erc20Kit.ValidationError ? nil : error)
+    }
+
+    private func syncState() {
         if feePriorityModule.feeRateState.isLoading || estimateGasLimitState.isLoading {
             amountModule.set(loading: true)
+
+            feeModule.set(externalError: nil)
             feeModule.set(loading: true)
             return
         }
@@ -62,25 +76,30 @@ class SendEthereumHandler {
         feeModule.set(loading: false)
 
         if case let .error(error) = feePriorityModule.feeRateState {
+            feeModule.set(fee: 0)
             // show primary error from feeRateKit
-            return
+            processFee(error: error)
         } else if case let .error(error) = estimateGasLimitState {
+            feeModule.set(fee: 0)
             // show secondary error from ethereum kit
+            processFee(error: error)
         } else if case let .value(feeRateValue) = feePriorityModule.feeRateState, case let .value(estimateGasLimitValue) = estimateGasLimitState {
             amountModule.set(availableBalance: interactor.availableBalance(gasPrice: feeRateValue, gasLimit: estimateGasLimitValue))
+
+            feeModule.set(externalError: nil)
             feeModule.set(fee: interactor.fee(gasPrice: feeRateValue, gasLimit: estimateGasLimitValue))
         }
     }
 
     private func syncEstimateGasLimit() {
-        guard let address = addressModule.currentAddress else {
+        guard let address = try? addressModule.validAddress() else {
             onReceive(gasLimit: 0)
             return
         }
         gasDisposeBag = DisposeBag()
 
         estimateGasLimitState = .loading
-        syncFee()
+        syncState()
         syncValidation()
 
         interactor.estimateGasLimit(to: address, value: amountModule.currentAmount, gasPrice: feePriorityModule.feeRate)
@@ -100,7 +119,7 @@ extension SendEthereumHandler: ISendHandler {
         amountModule.set(minimumRequiredBalance: interactor.minimumRequiredBalance)
 
         feeModule.set(availableFeeBalance: interactor.ethereumBalance)
-        syncFee()
+        syncState()
 
         syncEstimateGasLimit()
     }
@@ -167,7 +186,7 @@ extension SendEthereumHandler: ISendFeeDelegate {
 extension SendEthereumHandler: ISendFeePriorityDelegate {
 
     func onUpdateFeePriority() {
-        syncFee()
+        syncState()
         syncValidation()
         syncEstimateGasLimit()
     }
@@ -179,15 +198,27 @@ extension SendEthereumHandler {
     func onReceive(gasLimit: Int) {
         estimateGasLimitState = .value(gasLimit)
 
-        syncFee()
+        syncState()
         syncValidation()
     }
 
     func onGasLimitError(_ error: Error) {
         estimateGasLimitState = .error(error)
 
-        syncFee()
+        syncState()
         syncValidation()
+    }
+
+}
+
+private enum SendEthereumError: LocalizedError {
+    case serverError(String)
+
+    var errorDescription: String? {
+        switch self {
+        case .serverError(let message):
+            return "Server error: \(message)".localized
+        }
     }
 
 }

@@ -45,6 +45,7 @@ extension SendFeePriorityPresenter: ISendFeePriorityModule {
     func fetchFeeRate() {
         feeRateData = nil
         error = nil
+
         view?.set(duration: nil)
         view?.set(enabled: false)
 
@@ -88,11 +89,8 @@ extension SendFeePriorityPresenter: ISendFeePriorityInteractorDelegate {
         delegate?.onUpdateFeePriority()
     }
 
-    func didReceive(error: Error) {
+    func didReceiveError(error: Error) {
         self.error = error
-
-        view?.set(duration: nil)
-        view?.set(enabled: false)
 
         delegate?.onUpdateFeePriority()
     }

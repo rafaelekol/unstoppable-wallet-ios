@@ -17,7 +17,7 @@ class SendFeePresenter {
 
     private(set) var inputType: SendInputType = .coin
 
-    private var loading = false //Remove that fucking shit
+    private var externalError: Error?
 
     init(coin: Coin, interactor: ISendFeeInteractor) {
         baseCoin = coin
@@ -38,6 +38,11 @@ class SendFeePresenter {
     }
 
     private func syncError() {
+        guard externalError == nil else {
+            view?.set(error: externalError)
+            return
+        }
+
         do {
             try validate()
             view?.set(error: nil)
@@ -65,9 +70,6 @@ class SendFeePresenter {
 extension SendFeePresenter: ISendFeeModule {
 
     var isValid: Bool {
-        if loading {
-            return false
-        }
         do {
             try validate()
             return true
@@ -100,21 +102,13 @@ extension SendFeePresenter: ISendFeeModule {
         }
     }
 
-    var coinValue: CoinValue {
-        CoinValue(coin: coin, value: fee)
-    }
-
-    var currencyValue: CurrencyValue? {
-        if let rateValue = rateValue {
-            return CurrencyValue(currency: currency, value: fee * rateValue)
-        } else {
-            return nil
-        }
-    }
-
     func set(loading: Bool) {
-        self.loading = loading
         view?.set(loading: loading)
+    }
+
+    func set(externalError: Error?) {
+        self.externalError = externalError
+        syncError()
     }
 
     func set(fee: Decimal) {

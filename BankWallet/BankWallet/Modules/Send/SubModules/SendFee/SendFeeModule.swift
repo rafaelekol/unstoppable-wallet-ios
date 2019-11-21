@@ -30,6 +30,7 @@ protocol ISendFeeModule: AnyObject {
     var secondaryAmountInfo: AmountInfo? { get }
 
     func set(loading: Bool)
+    func set(externalError: Error?)
     func set(fee: Decimal)
     func set(availableFeeBalance: Decimal)
     func update(inputType: SendInputType)
