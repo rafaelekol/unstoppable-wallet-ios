@@ -37,7 +37,7 @@ class SendBitcoinHandler {
     }
 
     private func syncAvailableBalance() {
-        interactor.fetchAvailableBalance(feeRate: feePriorityModule.feeRate, address: addressModule.currentAddress, pluginData: pluginData)
+//        interactor.fetchAvailableBalance(feeRate: feePriorityModule.feeRate, address: addressModule.currentAddress, pluginData: pluginData)
     }
 
     private func syncMaximumAmount() {
@@ -49,11 +49,11 @@ class SendBitcoinHandler {
     }
 
     private func syncFee() {
-        interactor.fetchFee(amount: amountModule.currentAmount, feeRate: feePriorityModule.feeRate, address: addressModule.currentAddress, pluginData: pluginData)
+//        interactor.fetchFee(amount: amountModule.currentAmount, feeRate: feePriorityModule.feeRate, address: addressModule.currentAddress, pluginData: pluginData)
     }
 
     private func syncFeeDuration() {
-        feeModule.set(duration: feePriorityModule.duration)
+//        feeModule.set(duration: feePriorityModule.duration)
     }
 
 }
@@ -83,7 +83,7 @@ extension SendBitcoinHandler: ISendHandler {
     }
 
     func sendSingle() throws -> Single<Void> {
-        interactor.sendSingle(amount: try amountModule.validAmount(), address: try addressModule.validAddress(), feeRate: feePriorityModule.feeRate, pluginData: pluginData)
+        interactor.sendSingle(amount: try amountModule.validAmount(), address: try addressModule.validAddress(), feeRate: 0, pluginData: pluginData)
     }
 
 }

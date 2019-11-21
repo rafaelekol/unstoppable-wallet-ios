@@ -14,9 +14,10 @@ class SendFeePresenter {
 
     private var fee: Decimal = 0
     private var availableFeeBalance: Decimal?
-    private var duration: TimeInterval?
 
     private(set) var inputType: SendInputType = .coin
+
+    private var loading = false //Remove that fucking shit
 
     init(coin: Coin, interactor: ISendFeeInteractor) {
         baseCoin = coin
@@ -29,11 +30,10 @@ class SendFeePresenter {
     }
 
     private var coin: Coin {
-        return feeCoin ?? baseCoin
+        feeCoin ?? baseCoin
     }
 
     private func syncFeeLabels() {
-        view?.set(duration: duration)
         view?.set(fee: primaryAmountInfo, convertedFee: secondaryAmountInfo)
     }
 
@@ -65,6 +65,9 @@ class SendFeePresenter {
 extension SendFeePresenter: ISendFeeModule {
 
     var isValid: Bool {
+        if loading {
+            return false
+        }
         do {
             try validate()
             return true
@@ -109,6 +112,11 @@ extension SendFeePresenter: ISendFeeModule {
         }
     }
 
+    func set(loading: Bool) {
+        self.loading = loading
+        view?.set(loading: loading)
+    }
+
     func set(fee: Decimal) {
         self.fee = fee
         syncFeeLabels()
@@ -118,11 +126,6 @@ extension SendFeePresenter: ISendFeeModule {
     func set(availableFeeBalance: Decimal) {
         self.availableFeeBalance = availableFeeBalance
         syncError()
-    }
-
-    func set(duration: TimeInterval) {
-        self.duration = duration
-        syncFeeLabels()
     }
 
     func update(inputType: SendInputType) {

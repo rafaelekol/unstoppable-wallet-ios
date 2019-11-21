@@ -1,6 +1,7 @@
 import Foundation
 
 class SendAmountPresenter {
+    private let queue = DispatchQueue(label: "io.horizontalsystems.unstoppable.send_amount_presenter", qos: .utility)
     private let maxCoinDecimal = 8
 
     weak var view: ISendAmountView?
@@ -198,6 +199,10 @@ extension SendAmountPresenter: ISendAmountModule {
 
     func showKeyboard() {
         view?.showKeyboard()
+    }
+
+    func set(loading: Bool) {
+        view?.set(loading: loading)
     }
 
     func set(amount: Decimal) {
