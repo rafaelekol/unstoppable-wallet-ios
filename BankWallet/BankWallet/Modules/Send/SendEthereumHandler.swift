@@ -42,7 +42,6 @@ class SendEthereumHandler {
 
     init(interactor: ISendEthereumInteractor, amountModule: ISendAmountModule, addressModule: ISendAddressModule, feeModule: ISendFeeModule, feePriorityModule: ISendFeePriorityModule) {
         self.interactor = interactor
-
         self.amountModule = amountModule
         self.addressModule = addressModule
         self.feeModule = feeModule
@@ -65,23 +64,22 @@ class SendEthereumHandler {
     }
 
     private func syncState() {
-        if feePriorityModule.feeRateState.isLoading || estimateGasLimitState.isLoading {
-            amountModule.set(loading: true)
+        let loading = feePriorityModule.feeRateState.isLoading || estimateGasLimitState.isLoading
 
-            feeModule.set(externalError: nil)
-            feeModule.set(loading: true)
+        amountModule.set(loading: loading)
+        feeModule.set(loading: loading)
+
+        guard !loading else {
             return
         }
-        amountModule.set(loading: false)
-        feeModule.set(loading: false)
 
         if case let .error(error) = feePriorityModule.feeRateState {
             feeModule.set(fee: 0)
-            // show primary error from feeRateKit
+
             processFee(error: error)
         } else if case let .error(error) = estimateGasLimitState {
             feeModule.set(fee: 0)
-            // show secondary error from ethereum kit
+
             processFee(error: error)
         } else if case let .value(feeRateValue) = feePriorityModule.feeRateState, case let .value(estimateGasLimitValue) = estimateGasLimitState {
             amountModule.set(availableBalance: interactor.availableBalance(gasPrice: feeRateValue, gasLimit: estimateGasLimitValue))
@@ -138,7 +136,7 @@ extension SendEthereumHandler: ISendHandler {
 
     func sendSingle() throws -> Single<Void> {
         guard let feeRate = feePriorityModule.feeRate, case let .value(gasLimit) = estimateGasLimitState else {
-            throw SendTransactionError.unknown
+            throw SendTransactionError.noFee
         }
         return interactor.sendSingle(amount: try amountModule.validAmount(), address: try addressModule.validAddress(), gasPrice: feeRate, gasLimit: gasLimit)
     }

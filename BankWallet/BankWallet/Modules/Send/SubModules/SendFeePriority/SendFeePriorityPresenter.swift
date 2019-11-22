@@ -8,7 +8,7 @@ class SendFeePriorityPresenter {
     private let router: ISendFeePriorityRouter
     private let coin: Coin
 
-    private var feeRateData: FeeRateData?
+    private var feeRateData: FeeRate?
     private var error: Error?
 
     var feeRatePriority: FeeRatePriority
@@ -80,7 +80,7 @@ extension SendFeePriorityPresenter: ISendFeePriorityViewDelegate {
 
 extension SendFeePriorityPresenter: ISendFeePriorityInteractorDelegate {
 
-    func didUpdate(feeRate: FeeRateData) {
+    func didUpdate(feeRate: FeeRate) {
         self.feeRateData = feeRate
 
         view?.set(duration: feeRate.duration(priority: feeRatePriority))

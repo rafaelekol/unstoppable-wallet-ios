@@ -33,7 +33,6 @@ extension SendEthereumInteractor: ISendEthereumInteractor {
     }
 
     func estimateGasLimit(to address: String, value: Decimal, gasPrice: Int?) -> Single<Int> {
-//        Single.error(EthereumKit.SendError.infuraError(message: "Факинг стринги"))
         adapter.estimateGasLimit(to: address, value: value, gasPrice: gasPrice)
     }
 

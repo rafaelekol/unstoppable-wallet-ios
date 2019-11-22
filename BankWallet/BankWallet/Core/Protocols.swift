@@ -505,7 +505,7 @@ protocol IAddressParser {
 }
 
 protocol IFeeRateProvider {
-    func feeRate(for priority: FeeRatePriority) -> Single<FeeRateData>
+    func feeRate(for priority: FeeRatePriority) -> Single<FeeRate>
 }
 
 protocol IEncryptionManager {

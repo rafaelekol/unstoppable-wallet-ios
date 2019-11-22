@@ -1,8 +1,8 @@
 import Foundation
 import FeeRateKit
 
-struct FeeRateData {
-    let feeRate: FeeRate
+struct FeeRate {
+    let feeRate: FeeRateKit.FeeRate
 
     func feeRate(priority: FeeRatePriority) -> Int {
         switch priority {

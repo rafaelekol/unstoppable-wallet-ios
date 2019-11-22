@@ -73,12 +73,6 @@ extension SendRouter {
         views.append(addressView)
         routers.append(addressRouter)
 
-        guard let (feePriorityView, feePriorityModule, feePriorityRouter) = SendFeePriorityRouter.module(coin: coin) else {
-            return nil
-        }
-        views.append(feePriorityView)
-        routers.append(feePriorityRouter)
-
         var hodlerModule: ISendHodlerModule?
 
         if interactor.lockTimeEnabled && coin.type == .bitcoin {
@@ -87,6 +81,12 @@ extension SendRouter {
             views.append(hodlerView)
             routers.append(hodlerRouter)
         }
+
+        guard let (feePriorityView, feePriorityModule, feePriorityRouter) = SendFeePriorityRouter.module(coin: coin) else {
+            return nil
+        }
+        views.append(feePriorityView)
+        routers.append(feePriorityRouter)
 
         let (feeView, feeModule) = SendFeeRouter.module(coin: coin)
         views.append(feeView)

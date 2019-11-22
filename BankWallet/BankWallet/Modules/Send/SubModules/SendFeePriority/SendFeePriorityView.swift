@@ -20,8 +20,7 @@ class SendFeePriorityView: UIView {
 
         addSubview(selectableValueView)
         selectableValueView.snp.makeConstraints { maker in
-            maker.top.equalToSuperview().offset(CGFloat.margin3x)
-            maker.leading.trailing.equalToSuperview()
+            maker.top.leading.trailing.equalToSuperview()
         }
 
         addSubview(durationTitleLabel)

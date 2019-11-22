@@ -2,7 +2,7 @@ import FeeRateKit
 import RxSwift
 
 class FeeRateProvider {
-    private let feeRateKit: FeeRateKit
+    private let feeRateKit: FeeRateKit.Kit
 
     init(appConfigProvider: IAppConfigProvider) {
         let providerConfig = FeeProviderConfig(infuraProjectId: appConfigProvider.infuraCredentials.id,
@@ -11,25 +11,25 @@ class FeeRateProvider {
                 btcCoreRpcUser: nil,
                 btcCoreRpcPassword: nil
         )
-        feeRateKit = FeeRateKit.instance(providerConfig: providerConfig, minLogLevel: .error)
+        feeRateKit = FeeRateKit.Kit.instance(providerConfig: providerConfig, minLogLevel: .error)
     }
 
     // Fee rates
 
-    func ethereumGasPrice(for priority: FeeRatePriority) -> Single<FeeRateData> {
-        feeRateKit.ethereum.map { FeeRateData(feeRate: $0) }
+    func ethereumGasPrice(for priority: FeeRatePriority) -> Single<FeeRate> {
+        feeRateKit.ethereum.map { FeeRate(feeRate: $0) }
     }
 
-    func bitcoinFeeRate(for priority: FeeRatePriority) -> Single<FeeRateData> {
-        feeRateKit.bitcoin.map { FeeRateData(feeRate: $0) }
+    func bitcoinFeeRate(for priority: FeeRatePriority) -> Single<FeeRate> {
+        feeRateKit.bitcoin.map { FeeRate(feeRate: $0) }
     }
 
-    func bitcoinCashFeeRate(for priority: FeeRatePriority) -> Single<FeeRateData> {
-        feeRateKit.bitcoinCash.map { FeeRateData(feeRate: $0) }
+    func bitcoinCashFeeRate(for priority: FeeRatePriority) -> Single<FeeRate> {
+        feeRateKit.bitcoinCash.map { FeeRate(feeRate: $0) }
     }
 
-    func dashFeeRate(for priority: FeeRatePriority) -> Single<FeeRateData> {
-        feeRateKit.dash.map { FeeRateData(feeRate: $0) }
+    func dashFeeRate(for priority: FeeRatePriority) -> Single<FeeRate> {
+        feeRateKit.dash.map { FeeRate(feeRate: $0) }
     }
 
 }
@@ -41,7 +41,7 @@ class BitcoinFeeRateProvider: IFeeRateProvider {
         self.feeRateProvider = feeRateProvider
     }
 
-    func feeRate(for priority: FeeRatePriority) -> Single<FeeRateData> {
+    func feeRate(for priority: FeeRatePriority) -> Single<FeeRate> {
         feeRateProvider.bitcoinFeeRate(for: priority)
     }
 
@@ -54,7 +54,7 @@ class BitcoinCashFeeRateProvider: IFeeRateProvider {
         self.feeRateProvider = feeRateProvider
     }
 
-    func feeRate(for priority: FeeRatePriority) -> Single<FeeRateData> {
+    func feeRate(for priority: FeeRatePriority) -> Single<FeeRate> {
         feeRateProvider.bitcoinCashFeeRate(for: priority)
     }
 
@@ -67,7 +67,7 @@ class EthereumFeeRateProvider: IFeeRateProvider {
         self.feeRateProvider = feeRateProvider
     }
 
-    func feeRate(for priority: FeeRatePriority) -> Single<FeeRateData> {
+    func feeRate(for priority: FeeRatePriority) -> Single<FeeRate> {
         feeRateProvider.ethereumGasPrice(for: priority)
     }
 
@@ -80,7 +80,7 @@ class DashFeeRateProvider: IFeeRateProvider {
         self.feeRateProvider = feeRateProvider
     }
 
-    func feeRate(for priority: FeeRatePriority) -> Single<FeeRateData> {
+    func feeRate(for priority: FeeRatePriority) -> Single<FeeRate> {
         feeRateProvider.dashFeeRate(for: priority)
     }
 

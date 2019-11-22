@@ -177,9 +177,12 @@ class SendAmountView: UIView {
 
         inputField.rx.controlEvent(.editingChanged)
                 .asObservable()
+                .do(onNext: { [weak self] _ in
+                    self?.delegate.willChangeAmount(text: self?.inputField.text)
+                })
                 .debounce(.milliseconds(500), scheduler: MainScheduler.instance)
                 .subscribe(onNext: { [weak self] _ in
-                    self?.delegate.onChanged(amountText: self?.inputField.text)
+                    self?.delegate.didChangeAmount()
                 })
                 .disposed(by: disposeBag)
 

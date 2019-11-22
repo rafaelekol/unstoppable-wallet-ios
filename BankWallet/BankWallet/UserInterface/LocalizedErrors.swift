@@ -47,6 +47,7 @@ extension SendTransactionError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .connection: return "alert.no_internet".localized
+        case .noFee: return "alert.no_fee".localized
         case .unknown: return "alert.network_issue".localized
         }
     }

@@ -1,7 +1,6 @@
 import Foundation
 
 class SendAmountPresenter {
-    private let queue = DispatchQueue(label: "io.horizontalsystems.unstoppable.send_amount_presenter", qos: .utility)
     private let maxCoinDecimal = 8
 
     weak var view: ISendAmountView?
@@ -260,8 +259,8 @@ extension SendAmountPresenter: ISendAmountViewDelegate {
         syncError()
     }
 
-    func onChanged(amountText: String?) {
-        let enteredAmount = decimalParser.parseAnyDecimal(from: amountText)
+    func willChangeAmount(text: String?) {
+        let enteredAmount = decimalParser.parseAnyDecimal(from: text)
 
         switch inputType {
         case .coin:
@@ -281,7 +280,9 @@ extension SendAmountPresenter: ISendAmountViewDelegate {
         syncHint()
         syncMaxButton()
         syncError()
+    }
 
+    func didChangeAmount() {
         delegate?.onChangeAmount()
     }
 

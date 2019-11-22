@@ -18,7 +18,9 @@ protocol ISendAmountViewDelegate {
     func viewDidLoad()
 
     func isValid(text: String) -> Bool
-    func onChanged(amountText: String?)
+
+    func willChangeAmount(text: String?)
+    func didChangeAmount()
 
     func onSwitchClicked()
     func onMaxClicked()

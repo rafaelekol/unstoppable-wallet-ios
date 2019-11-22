@@ -16,7 +16,7 @@ protocol ISendFeePriorityInteractor {
 }
 
 protocol ISendFeePriorityInteractorDelegate {
-    func didUpdate(feeRate: FeeRateData)
+    func didUpdate(feeRate: FeeRate)
     func didReceiveError(error: Error)
 }
 
